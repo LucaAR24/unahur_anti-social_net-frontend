@@ -14,7 +14,8 @@ const normalizeUser = (user: any) => {
 
   const normalizedUser = {
     ...user,
-    id: user._id ?? user.id ?? user.usuarioId ?? user.userId,
+    id: user._id ?? user.id,        // id genérico
+    usuarioId: user._id ?? user.id, // siempre el ObjectId real
     nickname: user.nickname ?? user.username ?? user.name,
   }
 
@@ -44,16 +45,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [])
 
   const login = async (nickname: string, password: string) => {
-    if (password !== '123456') return false
     const res = await fetch('http://localhost:5000/usuarios')
     const usuarios = await res.json()
     const found = usuarios.find((u: any) => u.nickname === nickname)
-    if (found) {
+
+    if (found && found.password === password) {
       const normalizedUser = normalizeUser(found)
       setUser(normalizedUser)
       localStorage.setItem('user', JSON.stringify(normalizedUser))
       return true
     }
+
     return false
   }
 

@@ -14,7 +14,7 @@ const getPublicacionById = (id: string) =>
 
 const createPublicacion = (
   usuarioId: string,
-  body: { titulo: string; contenido: string; tags: string[] }
+  body: { titulo: string; contenido: string }
 ) => axios.post(`${API_URL}/usuarios/${usuarioId}/publicaciones`, body);
 
 const getPublicacionesByUsuarioId = (usuarioId: string) =>
@@ -32,6 +32,7 @@ const createImagen = (publicacionId: string, data: { url: string; descripcion?: 
   axios.post(`${API_URL}/publicaciones/${publicacionId}/imagenes`, data);
 
 //Tags
+const createOrAddTagToPublicacion = (publicacionId: string, tag: string) =>
+  axios.post(`${API_URL}/publicaciones/${publicacionId}/tags`, { tag });
 
-
-export { getUsuarios, createUsuario, getPublicaciones, getPublicacionById, createComentario, createPublicacion, getPublicacionesByUsuarioId, getComentariosByPublicacionId, createImagen };
+export { getUsuarios, createUsuario, getPublicaciones, getPublicacionById, createComentario, createPublicacion, getPublicacionesByUsuarioId, getComentariosByPublicacionId, createImagen, createOrAddTagToPublicacion };

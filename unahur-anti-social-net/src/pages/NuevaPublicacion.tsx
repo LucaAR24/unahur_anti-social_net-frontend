@@ -1,38 +1,53 @@
 import { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
-import { createPublicacion, createImagen } from '../services/api';
+import { createPublicacion, createImagen, createOrAddTagToPublicacion } from '../services/api';
 
 function NuevaPublicacion() {
   const auth = useAuth();
   const [titulo, setTitulo] = useState('');
   const [contenido, setContenido] = useState('');
+  const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [imagenes, setImagenes] = useState<{ url: string; descripcion?: string }[]>([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const addTag = () => {
+    const normalizedTag = tagInput.trim();
+
+    if (normalizedTag && !tags.includes(normalizedTag)) {
+      setTags((prev) => [...prev, normalizedTag]);
+    }
+
+    setTagInput('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
-    if (!auth.user?.id) {
+    if (!auth.user?.usuarioId) {
       setError('Debes iniciar sesión para publicar.');
       return;
     }
 
     try {
-      // 1. Crear publicación
-      const pubRes = await createPublicacion(String(auth.user.id), {
+      // 1. Crear la publicación sin enviar tags directamente
+      const pubRes = await createPublicacion(String(auth.user.usuarioId), {
         titulo,
         contenido,
-        tags,
       });
 
       const publicacionId = pubRes.data.id;
 
-      // 2. Crear imágenes asociadas
+      // 2. Agregar cada etiqueta al publicar
+      for (const tag of tags) {
+        await createOrAddTagToPublicacion(publicacionId, tag);
+      }
+
+      // 3. Crear imágenes asociadas
       for (const img of imagenes) {
         await createImagen(publicacionId, img);
       }
@@ -40,6 +55,7 @@ function NuevaPublicacion() {
       setSuccess('Publicación creada con éxito');
       setTitulo('');
       setContenido('');
+      setTagInput('');
       setTags([]);
       setImagenes([]);
     } catch (err: any) {
@@ -70,11 +86,26 @@ function NuevaPublicacion() {
       </Form.Group>
 
       <Form.Group className="mb-3">
-        <Form.Label>Etiquetas (separadas por coma)</Form.Label>
+        <Form.Label>Etiquetas</Form.Label>
         <Form.Control
-          value={tags.join(',')}
-          onChange={(e) => setTags(e.target.value.split(',').map(t => t.trim()))}
+          placeholder="Escribe una etiqueta y presiona Enter o coma"
+          value={tagInput}
+          onChange={(e) => setTagInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === ',' || e.key === 'Enter') {
+              e.preventDefault();
+              addTag();
+            }
+          }}
+          onBlur={addTag}
         />
+        <div className="mt-2 d-flex flex-wrap gap-2">
+          {tags.map((tag) => (
+            <span key={tag} className="badge bg-secondary">
+              #{tag}
+            </span>
+          ))}
+        </div>
       </Form.Group>
 
       <Form.Group className="mb-3">

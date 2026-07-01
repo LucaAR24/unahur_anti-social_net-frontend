@@ -40,7 +40,7 @@ function PublicacionDetalle() {
     try {
       const res = await createComentario(id!, {
         contenido: nuevoComentario,
-        usuarioId: String(auth.user.id),
+        usuarioId: String(auth.user.usuarioId),
       });
 
 
