@@ -1,0 +1,67 @@
+.perfil-header {
+  padding: 1rem 0.5rem;
+}
+
+.perfil-header-title {
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+}
+
+.perfil-actions {
+  gap: 0.75rem;
+}
+
+.perfil-card-meta {
+  gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .perfil-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .perfil-actions > .btn {
+    width: 100%;
+  }
+
+  .perfil-card-meta {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .perfil-card-meta .btn {
+    width: 100%;
+  }
+
+  .perfil-card-meta span {
+    width: 100%;
+  }
+
+  .perfil-header {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .post-action-group {
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+    justify-content: flex-start !important;
+  }
+
+  .post-action-group > .btn,
+  .post-action-group > .comment-count-badge {
+    flex: 0 0 auto !important;
+  }
+
+  .comment-count-badge {
+    width: auto !important;
+    min-width: 3.2rem;
+    justify-content: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}

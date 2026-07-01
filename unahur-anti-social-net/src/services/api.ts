@@ -20,6 +20,9 @@ const createPublicacion = (
 const getPublicacionesByUsuarioId = (usuarioId: string) =>
   axios.get(`${API_URL}/usuarios/${usuarioId}/publicaciones`);
 
+const deletePublicacion = (publicacionId: string) =>
+  axios.delete(`${API_URL}/publicaciones/${publicacionId}`);
+
 //Comentarios
 const createComentario = (publicacionId: string, data: { contenido: string, usuarioId: string }) =>
   axios.post(`${API_URL}/publicaciones/${publicacionId}/comentarios`, data);
@@ -35,4 +38,4 @@ const createImagen = (publicacionId: string, data: { url: string; descripcion?: 
 const createOrAddTagToPublicacion = (publicacionId: string, tag: string) =>
   axios.post(`${API_URL}/publicaciones/${publicacionId}/tags`, { tag });
 
-export { getUsuarios, createUsuario, getPublicaciones, getPublicacionById, createComentario, createPublicacion, getPublicacionesByUsuarioId, getComentariosByPublicacionId, createImagen, createOrAddTagToPublicacion };
+export { getUsuarios, createUsuario, getPublicaciones, getPublicacionById, createComentario, createPublicacion, getPublicacionesByUsuarioId, getComentariosByPublicacionId, createImagen, createOrAddTagToPublicacion, deletePublicacion };

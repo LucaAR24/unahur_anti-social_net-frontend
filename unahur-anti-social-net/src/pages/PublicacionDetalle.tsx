@@ -12,6 +12,8 @@ function PublicacionDetalle() {
   const [nuevoComentario, setNuevoComentario] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [liked, setLiked] = useState(false);
+  const [likes, setLikes] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -19,6 +21,7 @@ function PublicacionDetalle() {
         const publicacionRes = await getPublicacionById(id!);
 
         setPublicacion(publicacionRes.data);
+        setLikes(publicacionRes.data.likes ?? 0);
       } catch (err) {
         console.error(err);
       } finally {
@@ -43,9 +46,7 @@ function PublicacionDetalle() {
         usuarioId: String(auth.user.usuarioId),
       });
 
-
       if (res.status === 201 || res.status === 200) {
-        // Actualizar la publicación con el nuevo comentario
         setPublicacion((prev: any) => ({
           ...prev,
           comentarios: [...(prev.comentarios ?? []), res.data],
@@ -57,6 +58,14 @@ function PublicacionDetalle() {
       const backendMessage = err?.response?.data?.message || err?.response?.data?.error;
       setError(backendMessage || 'No se pudo agregar el comentario');
     }
+  };
+
+  const toggleLike = () => {
+    setLiked((prev) => {
+      const next = !prev;
+      setLikes((current) => Math.max(0, current + (next ? 1 : -1)));
+      return next;
+    });
   };
 
   if (loading) return <Spinner animation="border" />;
@@ -91,14 +100,48 @@ function PublicacionDetalle() {
             )}
 
             <Card.Text>
-              Etiquetas:
               {publicacion.tags?.map((tag: any) => (
-                <Badge bg="secondary" className="me-1" key={tag._id}>
-                  {tag.tag}
+                <Badge
+                  bg="light"
+                  text="dark"
+                  className="me-1"
+                  style={{ border: '1px solid #dee2e6' }}
+                  key={tag._id}
+                >
+                  #{tag.tag}
                 </Badge>
               ))}
             </Card.Text>
-
+            <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+              <div className="post-action-group d-flex align-items-center gap-3 flex-wrap">
+                <Button
+                  variant="link"
+                  className={`p-0 ${liked ? 'text-danger' : 'text-muted'}`}
+                  onClick={toggleLike}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <span style={{ fontSize: '1.2rem' }}>
+                    {liked ? '❤️' : '🤍'}
+                  </span>
+                </Button>
+                <span style={{ fontWeight: 600 }}>{likes}</span>
+                <span
+                  className="comment-count-badge"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    backgroundColor: '#f1f3f5',
+                    border: '1px solid #dee2e6',
+                    borderRadius: '999px',
+                    padding: '0.25rem 0.65rem',
+                    color: '#495057',
+                  }}
+                >
+                  💬 {publicacion.comentarios?.length ?? 0}
+                </span>
+              </div>
+            </div>
             <Card.Title>Comentarios</Card.Title>
             <ListGroup className="mb-3">
               {publicacion.comentarios?.map((comentario: any) => (
@@ -124,9 +167,11 @@ function PublicacionDetalle() {
                   required
                 />
               </Form.Group>
-              <Button type="submit" variant="primary">
-                Comentar
-              </Button>
+              <div className="d-grid d-sm-flex justify-content-sm-end">
+                <Button type="submit" variant="primary" className="py-2">
+                  Comentar
+                </Button>
+              </div>
             </Form>
           </Card.Body>
         </Card>

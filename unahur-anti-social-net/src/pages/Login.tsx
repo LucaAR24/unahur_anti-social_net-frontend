@@ -7,11 +7,36 @@ function Login() {
   const [nickname, setNickname] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{
+    nickname?: string;
+    password?: string;
+  }>({});
   const auth = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const validateFields = (): boolean => {
+    const errors: typeof fieldErrors = {};
+
+    if (!nickname.trim()) {
+      errors.nickname = 'El nombre de usuario es requerido';
+    }
+    if (!password.trim()) {
+      errors.password = 'La contraseña es requerida';
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setFieldErrors({});
+
+    if (!validateFields()) {
+      return;
+    }
+
     const success = await auth?.login(nickname, password);
     if (success) {
       navigate('/perfil');
@@ -31,8 +56,13 @@ function Login() {
             type="text"
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
-            required
+            isInvalid={!!fieldErrors.nickname}
           />
+          {fieldErrors.nickname && (
+            <Form.Control.Feedback type="invalid" style={{ display: 'block' }}>
+              {fieldErrors.nickname}
+            </Form.Control.Feedback>
+          )}
         </Form.Group>
 
         <Form.Group className="mb-3">
@@ -41,8 +71,13 @@ function Login() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
+            isInvalid={!!fieldErrors.password}
           />
+          {fieldErrors.password && (
+            <Form.Control.Feedback type="invalid" style={{ display: 'block' }}>
+              {fieldErrors.password}
+            </Form.Control.Feedback>
+          )}
         </Form.Group>
         
         <Button variant="primary" type="submit" className="w-100">
