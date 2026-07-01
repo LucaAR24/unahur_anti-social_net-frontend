@@ -72,13 +72,23 @@ function Home() {
                   </Badge>
                 ))}
               </Card.Text>
-              {post.imagenes?.map((img: any) => (
-                <Card.Img
-                  key={img._id}
-                  src={img.url}
-                  alt={img.descripcion ?? 'Imagen de publicación'}
-                />
-              ))}
+              {post.imagenes?.length > 0 && (
+                <div className="d-flex flex-wrap gap-2 mt-3">
+                  {post.imagenes?.map((img: any) => (
+                    <Card.Img
+                      key={img._id}
+                      src={img.url}
+                      alt={img.descripcion ?? 'Imagen de publicación'}
+                      style={{
+                        width: post.imagenes.length > 1 ? 'calc(50% - 0.5rem)' : '220px',
+                        maxHeight: '180px',
+                        objectFit: 'cover',
+                        borderRadius: '0.5rem',
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
             </Card.Body>
           </Card>
         ))

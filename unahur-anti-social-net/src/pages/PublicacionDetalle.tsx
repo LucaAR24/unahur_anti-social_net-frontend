@@ -72,13 +72,23 @@ function PublicacionDetalle() {
               Usuario: {publicacion.usuarioId.nickname}
             </Card.Subtitle>
 
-            {publicacion.imagenes?.map((img: any) => (
-              <Card.Img
-                key={img._id}
-                src={img.url}
-                alt={img.descripcion ?? 'Imagen de publicación'}
-              />
-            ))}
+            {publicacion.imagenes?.length > 0 && (
+              <div className="d-flex flex-wrap gap-2 mt-3 mb-3">
+                {publicacion.imagenes.map((img: any) => (
+                  <Card.Img
+                    key={img._id}
+                    src={img.url}
+                    alt={img.descripcion ?? 'Imagen de publicación'}
+                    style={{
+                      width: publicacion.imagenes.length > 1 ? 'calc(50% - 0.5rem)' : '320px',
+                      maxHeight: '240px',
+                      objectFit: 'cover',
+                      borderRadius: '0.5rem',
+                    }}
+                  />
+                ))}
+              </div>
+            )}
 
             <Card.Text>
               Etiquetas:
