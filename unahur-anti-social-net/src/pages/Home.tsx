@@ -1,35 +1,60 @@
 import { useEffect, useState } from 'react';
 import { Container, Card, Button, Spinner, Badge, Form } from 'react-bootstrap';
 import { getPublicaciones } from '../services/api';
+import { getLikedPublicaciones, addLikedPublicacion, removeLikedPublicacion } from '../services/likedPosts';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function Home() {
+  const auth = useAuth();
   const [posts, setPosts] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const userId = auth.user?.id ? String(auth.user.id) : undefined;
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         const res = await getPublicaciones();
-        console.log(res.data);
-        setPosts(res.data);
+        const likedPosts = userId ? getLikedPublicaciones(userId) : [];
+
+        const normalizedPosts = res.data.map((post: any) => {
+          const id = post._id ?? post.id;
+          const liked = id ? likedPosts.includes(id) : false;
+          return {
+            ...post,
+            liked,
+            likes: Math.max(0, (post.likes ?? 0) + (liked ? 1 : 0)),
+          };
+        });
+
+        setPosts(normalizedPosts);
       } catch (err) {
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
+
     fetchPosts();
-  }, []);
+  }, [userId]);
 
   const toggleLike = (postId: string) => {
+    if (!auth.user) {
+      navigate('/login');
+      return;
+    }
+
+    const currentUserId = String(auth.user.id);
+
     setPosts((prev) =>
       prev.map((post) => {
         const id = post._id ?? post.id;
         if (id !== postId) return post;
         const liked = !post.liked;
+        if (liked) addLikedPublicacion(id, currentUserId);
+        else removeLikedPublicacion(id, currentUserId);
         return {
           ...post,
           liked,

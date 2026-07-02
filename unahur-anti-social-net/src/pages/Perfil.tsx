@@ -1,11 +1,12 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState } from 'react';
 import { Container, Card, Button, Spinner, Badge, Modal } from 'react-bootstrap';
-import { AuthContext } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { getPublicacionesByUsuarioId, deletePublicacion } from '../services/api';
+import { getLikedPublicaciones, addLikedPublicacion, removeLikedPublicacion } from '../services/likedPosts';
 import { useNavigate } from 'react-router-dom';
 
 function Perfil() {
-  const auth = useContext(AuthContext);
+  const auth = useAuth();
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -14,14 +15,24 @@ function Perfil() {
   const [deleteError, setDeleteError] = useState('');
   const [headerLoaded, setHeaderLoaded] = useState(false);
   const navigate = useNavigate();
+  const userId = auth.user?.id ? String(auth.user.id) : undefined;
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const userId = auth?.user?.id;
         if (userId) {
-          const res = await getPublicacionesByUsuarioId(String(userId));
-          setPosts(res.data);
+          const res = await getPublicacionesByUsuarioId(userId);
+          const likedPosts = getLikedPublicaciones(userId);
+          const normalizedPosts = res.data.map((post: any) => {
+            const id = post._id ?? post.id;
+            const liked = id ? likedPosts.includes(id) : false;
+            return {
+              ...post,
+              liked,
+              likes: Math.max(0, (post.likes ?? 0) + (liked ? 1 : 0)),
+            };
+          });
+          setPosts(normalizedPosts);
         }
       } catch (err) {
         console.error(err);
@@ -30,18 +41,23 @@ function Perfil() {
       }
     };
     fetchPosts();
-  }, [auth?.user]);
+  }, [userId]);
 
   useEffect(() => {
     setHeaderLoaded(true);
   }, []);
 
   const toggleLike = (postId: string) => {
+    if (!auth.user) return;
+    const currentUserId = String(auth.user.id);
+
     setPosts((prev) =>
       prev.map((post) => {
         const id = post._id ?? post.id;
         if (id !== postId) return post;
         const liked = !post.liked;
+        if (liked) addLikedPublicacion(id, currentUserId);
+        else removeLikedPublicacion(id, currentUserId);
         return {
           ...post,
           liked,

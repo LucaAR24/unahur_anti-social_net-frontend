@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card, Container, Spinner, ListGroup, Badge, Form, Button, Alert } from 'react-bootstrap';
 import { getPublicacionById, createComentario } from '../services/api';
+import { hasLikedPublicacion, addLikedPublicacion, removeLikedPublicacion } from '../services/likedPosts';
 import { useAuth } from '../context/AuthContext';
 
 function PublicacionDetalle() {
   const { id } = useParams();
   const navigate = useNavigate();
   const auth = useAuth();
+  const userId = auth.user?.id ? String(auth.user.id) : undefined;
   const [publicacion, setPublicacion] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [nuevoComentario, setNuevoComentario] = useState('');
@@ -20,9 +22,12 @@ function PublicacionDetalle() {
     const fetchData = async () => {
       try {
         const publicacionRes = await getPublicacionById(id!);
+        const baseLikes = publicacionRes.data.likes ?? 0;
+        const alreadyLiked = id && userId ? hasLikedPublicacion(id, userId) : false;
 
         setPublicacion(publicacionRes.data);
-        setLikes(publicacionRes.data.likes ?? 0);
+        setLiked(alreadyLiked);
+        setLikes(baseLikes + (alreadyLiked ? 1 : 0));
       } catch (err: any) {
         console.error(err);
         navigate('/');
@@ -31,7 +36,7 @@ function PublicacionDetalle() {
       }
     };
     fetchData();
-  }, [id, navigate]);
+  }, [id, navigate, userId]);
 
   const handleSubmitComentario = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,11 +68,22 @@ function PublicacionDetalle() {
   };
 
   const toggleLike = () => {
-    setLiked((prev) => {
-      const next = !prev;
-      setLikes((current) => Math.max(0, current + (next ? 1 : -1)));
-      return next;
-    });
+    if (!auth.user) {
+      navigate('/login');
+      return;
+    }
+    if (!id) return;
+
+    const currentUserId = String(auth.user.id);
+    const nextLiked = !liked;
+    setLiked(nextLiked);
+    setLikes((current) => Math.max(0, current + (nextLiked ? 1 : -1)));
+
+    if (nextLiked) {
+      addLikedPublicacion(id, currentUserId);
+    } else {
+      removeLikedPublicacion(id, currentUserId);
+    }
   };
 
   if (loading) return <Spinner animation="border" />;
