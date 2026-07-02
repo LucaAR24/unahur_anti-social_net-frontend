@@ -133,6 +133,17 @@ function Registro() {
           Registrarse
         </Button>
       </Form>
+      <div className="mt-3 text-center">
+        ¿Ya tenés cuenta?{' '}
+        <Button
+          variant="link"
+          className="p-0 align-baseline"
+          style={{ verticalAlign: 'baseline' }}
+          onClick={() => navigate('/login')}
+        >
+          Iniciar sesión
+        </Button>
+      </div>
     </Container>
   );
 }

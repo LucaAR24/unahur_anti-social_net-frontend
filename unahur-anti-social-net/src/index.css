@@ -2,6 +2,56 @@
   padding: 1rem 0.5rem;
 }
 
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.app-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.app-sidebar {
+  width: 240px;
+  min-height: 100vh;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.app-main {
+  flex: 1;
+}
+
+.app-footer {
+  flex-shrink: 0;
+}
+
+.top-nav {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-link {
+  padding: 0.75rem 0.75rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 991.98px) {
+  .app-shell {
+    flex-direction: column;
+  }
+
+  .app-sidebar {
+    display: none !important;
+  }
+}
+
 .perfil-header-title {
   font-size: clamp(1.8rem, 4vw, 2.4rem);
   font-weight: 700;

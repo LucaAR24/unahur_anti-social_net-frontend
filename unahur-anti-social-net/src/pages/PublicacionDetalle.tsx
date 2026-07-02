@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Card, Container, Spinner, ListGroup, Badge, Form, Button, Alert } from 'react-bootstrap';
 import { getPublicacionById, createComentario } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 function PublicacionDetalle() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const auth = useAuth();
   const [publicacion, setPublicacion] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -22,14 +23,15 @@ function PublicacionDetalle() {
 
         setPublicacion(publicacionRes.data);
         setLikes(publicacionRes.data.likes ?? 0);
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
+        navigate('/');
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-  }, [id]);
+  }, [id, navigate]);
 
   const handleSubmitComentario = async (e: React.FormEvent) => {
     e.preventDefault();

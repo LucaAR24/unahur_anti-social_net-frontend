@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { Form, Button, Alert, Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
@@ -13,6 +13,12 @@ function Login() {
   }>({});
   const auth = useContext(AuthContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (auth?.user) {
+      navigate('/');
+    }
+  }, [auth?.user, navigate]);
 
   const validateFields = (): boolean => {
     const errors: typeof fieldErrors = {};
@@ -84,6 +90,17 @@ function Login() {
           Entrar
         </Button>
       </Form>
+      <div className="mt-3 text-center">
+        ¿No tenés una cuenta?{' '}
+        <Button
+          variant="link"
+          className="p-0 align-baseline"
+          style={{ verticalAlign: 'baseline' }}
+          onClick={() => navigate('/registro')}
+        >
+          Registrate ahora
+        </Button>
+      </div>
     </Container>
   );
 }

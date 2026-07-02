@@ -25,20 +25,24 @@ function App() {
 };
 
   return (
-    <>
+    <div className="app-shell">
       <MyNavbar />
-      <Container className="mt-4">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/registro" element={<Registro />} />
-          <Route path="/post/:id" element={<PublicacionDetalle />} />
-          <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
-          <Route path="/nueva-publicacion" element={<ProtectedRoute><NuevaPublicacion /></ProtectedRoute>} />
-        </Routes>
-      </Container>
-      <MyFooter />
-    </>
+      <div className="app-content-wrapper">
+        <main className="app-main">
+          <Container className="mt-4">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/registro" element={<Registro />} />
+              <Route path="/post/:id" element={<PublicacionDetalle />} />
+              <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
+              <Route path="/nueva-publicacion" element={<ProtectedRoute><NuevaPublicacion /></ProtectedRoute>} />
+            </Routes>
+          </Container>
+        </main>
+        <MyFooter />
+      </div>
+    </div>
   );
 }
 

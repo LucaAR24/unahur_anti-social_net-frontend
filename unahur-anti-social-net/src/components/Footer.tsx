@@ -2,7 +2,7 @@ import { Container } from 'react-bootstrap';
 
 function MyFooter() {
   return (
-    <footer className="bg-dark text-light py-3 mt-4">
+    <footer className="bg-dark text-light py-3 app-footer">
       <Container className="text-center">
         <small>Arenas Luca Patricio - Comisión 1</small>
       </Container>
