@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Form, Button, Alert, Badge, ListGroup, Image, InputGroup } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { createPublicacion, createImagen, createOrAddTagToPublicacion } from '../services/api';
 
@@ -14,6 +15,7 @@ function NuevaPublicacion() {
   const [success, setSuccess] = useState('');
   const [validated, setValidated] = useState(false);
   const [imageInput, setImageInput] = useState('');
+  const navigate = useNavigate();
 
   const addTag = () => {
     const normalizedTag = tagInput.trim();
@@ -70,6 +72,12 @@ function NuevaPublicacion() {
       setTagInput('');
       setTags([]);
       setImagenes([]);
+      setError('');
+      setValidated(false);
+
+      // Redirect to the newly created post after a short delay so user sees the success message
+      const REDIRECT_DELAY_MS = 2500;
+      setTimeout(() => navigate(`/post/${publicacionId}`), REDIRECT_DELAY_MS);
     } catch (err: any) {
       const backendMessage = err?.response?.data?.message || err?.response?.data?.error;
       setError(backendMessage || 'No se pudo crear la publicación');

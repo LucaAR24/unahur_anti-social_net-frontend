@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Form, Button, Alert, Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { createUsuario } from '../services/api';
@@ -15,6 +15,11 @@ function Registro() {
     password?: string;
   }>({});
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirect any access to Registro back to home
+    navigate('/', { replace: true });
+  }, [navigate]);
 
   const validateFields = (): boolean => {
     const errors: typeof fieldErrors = {};
