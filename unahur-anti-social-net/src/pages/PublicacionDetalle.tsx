@@ -21,6 +21,7 @@ function PublicacionDetalle() {
   const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
   const [deletingComment, setDeletingComment] = useState(false);
   const successTimeoutRef = useRef<number | null>(null);
+  const [submittingComment, setSubmittingComment] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,10 +51,15 @@ function PublicacionDetalle() {
       setError('Debes iniciar sesión para comentar.');
       return;
     }
+    if (!nuevoComentario || nuevoComentario.trim() === '') {
+      setError('El comentario no puede estar vacío.');
+      return;
+    }
 
     try {
+      setSubmittingComment(true);
       const res = await createComentario(id!, {
-        contenido: nuevoComentario,
+        contenido: nuevoComentario.trim(),
         usuarioId: String(auth.user.usuarioId),
       });
 
@@ -71,6 +77,7 @@ function PublicacionDetalle() {
       const backendMessage = err?.response?.data?.message || err?.response?.data?.error;
       setError(backendMessage || 'No se pudo agregar el comentario');
     }
+      setSubmittingComment(false);
   };
 
   useEffect(() => {
@@ -266,8 +273,13 @@ function PublicacionDetalle() {
                 />
               </Form.Group>
               <div className="d-grid d-sm-flex justify-content-sm-end">
-                <Button type="submit" variant="primary" className="py-2">
-                  Comentar
+                <Button
+                  type="submit"
+                  variant="primary"
+                  className="py-2"
+                  disabled={submittingComment || nuevoComentario.trim().length === 0}
+                >
+                  {submittingComment ? 'Enviando...' : 'Comentar'}
                 </Button>
               </div>
             </Form>
