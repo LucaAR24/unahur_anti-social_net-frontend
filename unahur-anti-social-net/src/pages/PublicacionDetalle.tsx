@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Card, Container, Spinner, ListGroup, Badge, Form, Button, Alert } from 'react-bootstrap';
-import { getPublicacionById, createComentario } from '../services/api';
+import { Card, Container, Spinner, ListGroup, Badge, Form, Button, Alert, Modal } from 'react-bootstrap';
+import { getPublicacionById, createComentario, deleteComentario } from '../services/api';
 import { hasLikedPublicacion, addLikedPublicacion, removeLikedPublicacion } from '../services/likedPosts';
 import { useAuth } from '../context/AuthContext';
 
@@ -17,6 +17,10 @@ function PublicacionDetalle() {
   const [success, setSuccess] = useState('');
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(0);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+  const [deletingComment, setDeletingComment] = useState(false);
+  const successTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,10 +64,55 @@ function PublicacionDetalle() {
         }));
         setNuevoComentario('');
         setSuccess('Comentario agregado con éxito');
+        if (successTimeoutRef.current) clearTimeout(successTimeoutRef.current);
+        successTimeoutRef.current = window.setTimeout(() => setSuccess(''), 2500);
       }
     } catch (err: any) {
       const backendMessage = err?.response?.data?.message || err?.response?.data?.error;
       setError(backendMessage || 'No se pudo agregar el comentario');
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleDeleteComentario = async (comentarioId: string) => {
+    if (!auth.user) {
+      navigate('/login');
+      return;
+    }
+    if (!id) return;
+
+    try {
+      await deleteComentario(id, comentarioId);
+      setPublicacion((prev: any) => ({
+        ...prev,
+        comentarios: (prev.comentarios ?? []).filter((c: any) => (c._id ?? c.id) !== comentarioId),
+      }));
+    } catch (err: any) {
+      console.error('Error al eliminar comentario', err);
+    }
+  };
+
+  const openDeleteModal = (comentarioId: string) => {
+    setCommentToDelete(comentarioId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!commentToDelete) return;
+    setDeletingComment(true);
+    try {
+      await handleDeleteComentario(commentToDelete);
+      setShowDeleteModal(false);
+      setCommentToDelete(null);
+    } finally {
+      setDeletingComment(false);
     }
   };
 
@@ -162,14 +211,45 @@ function PublicacionDetalle() {
             </div>
             <Card.Title>Comentarios</Card.Title>
             <ListGroup className="mb-3">
-              {publicacion.comentarios?.map((comentario: any) => (
-                <ListGroup.Item key={comentario.id ?? comentario._id}>
-                  <strong>{comentario.usuarioId?.nickname}</strong>
-                  <br />
-                  {comentario.contenido}
-                </ListGroup.Item>
-              ))}
+              {publicacion.comentarios?.map((comentario: any) => {
+                const commentId = comentario.id ?? comentario._id;
+                const commentUserId = comentario.usuarioId?._id ?? comentario.usuarioId?.id ?? comentario.usuarioId;
+                const currentUserId = auth.user ? (auth.user.usuarioId ?? auth.user.id) : undefined;
+                const isOwner = currentUserId && String(currentUserId) === String(commentUserId);
+
+                return (
+                  <ListGroup.Item key={commentId} className="d-flex justify-content-between align-items-start">
+                    <div>
+                      <strong>{comentario.usuarioId?.nickname ?? 'Anónimo'}</strong>
+                      <br />
+                      {comentario.contenido}
+                    </div>
+                    {isOwner && (
+                      <div>
+                        <Button variant="outline-danger" size="sm" onClick={() => openDeleteModal(commentId)}>
+                          Eliminar
+                        </Button>
+                      </div>
+                    )}
+                  </ListGroup.Item>
+                );
+              })}
             </ListGroup>
+
+            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
+              <Modal.Header closeButton>
+                <Modal.Title>Eliminar comentario</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>¿Estás seguro de que deseas eliminar este comentario?</Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowDeleteModal(false)} disabled={deletingComment}>
+                  Cancelar
+                </Button>
+                <Button variant="danger" onClick={confirmDelete} disabled={deletingComment}>
+                  {deletingComment ? 'Eliminando...' : 'Eliminar'}
+                </Button>
+              </Modal.Footer>
+            </Modal>
 
             {error && <Alert variant="danger">{error}</Alert>}
             {success && <Alert variant="success">{success}</Alert>}

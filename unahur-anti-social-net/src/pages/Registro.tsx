@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Form, Button, Alert, Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { createUsuario } from '../services/api';
 
 function Registro() {
@@ -15,11 +16,14 @@ function Registro() {
     password?: string;
   }>({});
   const navigate = useNavigate();
+  const auth = useAuth();
 
   useEffect(() => {
-    // Redirect any access to Registro back to home
-    navigate('/', { replace: true });
-  }, [navigate]);
+    // If user is already logged in, prevent access to Registro and send them home
+    if (!auth.loading && auth.user) {
+      navigate('/', { replace: true });
+    }
+  }, [navigate, auth.loading, auth.user]);
 
   const validateFields = (): boolean => {
     const errors: typeof fieldErrors = {};
