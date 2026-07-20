@@ -41,27 +41,32 @@ Antes de instalar y correr el proyecto, asegurate de tener:
    ```bash
    code .
    ```
-   
-3. Instalar las dependencias utilizando la consola de Visual (Ctrl + J):
+
+3. Seleccionar la carpeta del Backend:
+    ```bash
+   cd anti-social-documental-tp-24/
+   ```
+
+4. Instalar las dependencias utilizando la consola de Visual (Ctrl + J):
    ```bash
    npm i
    ```
 
-4. Levantar Docker Compose:
+5. Levantar Docker Compose:
    ```bash
    docker-compose up -d
    ```
 
-5. Verificar que el backend esté corriendo en:
+6. Verificar que el backend esté corriendo en:
    ```bash
    https://localhost:5000
    ```
    
-6. Pueden fallar las primeras veces en la creación de la base de datos, en caso de que esto ocurra:
+7. Pueden fallar las primeras veces en la creación de la base de datos, en caso de que esto ocurra:
    ```bash
    docker-compose down
    ```
-   y vuelva al paso 4.
+   y vuelva al paso 5.
 
    Si es repetitivo este paso, es posible revisar con:
    ```bash
