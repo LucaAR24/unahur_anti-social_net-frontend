@@ -36,15 +36,15 @@ Antes de instalar y correr el proyecto, asegurate de tener:
    ```bash
    git clone https://github.com/EP-UnaHur-2026C1/anti-social-documental-tp-24
    ```
-   
-2. Abrir con Visual la api:
-   ```bash
-   code .
-   ```
 
-3. Seleccionar la carpeta del Backend:
+2. Seleccionar la carpeta del Backend:
     ```bash
    cd anti-social-documental-tp-24/
+   ```
+
+3. Abrir con Visual la api:
+   ```bash
+   code .
    ```
 
 4. Instalar las dependencias utilizando la consola de Visual (Ctrl + J):
